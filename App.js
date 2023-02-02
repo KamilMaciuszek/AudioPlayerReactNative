@@ -25,19 +25,20 @@ export default function App() {
           }
         }}>
           <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{headerShown: false}}
+          />
+          <Stack.Screen
           name = "Category"
           component={CategoryScreen}
           options={{title: "Hello, user"}}
           />
-          <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{title: "Login" }}          
-          />
+          
           <Stack.Screen
           name="Register"
           component={RegisterScreen}
-          options={{title: "Register"}}
+          options={{ headerTitle: "", headerTransparent: true, headerStyle: {backgroundColor: "transparent"}}}
           />
           <Stack.Screen
           name =  "Player"
@@ -50,9 +51,3 @@ export default function App() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  rootContainer: {
-    backgroundColor: Colors.primaryBlack
-  }
-})
