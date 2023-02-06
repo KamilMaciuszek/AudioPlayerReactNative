@@ -21,6 +21,12 @@ function LoginScreen() {
   function onLoginPressHandler() {
     navigation.navigate("Category");
   }
+
+//   const [data, setData] = useState("");
+
+  
+
+
   return (
     <View style={styles.root}>
       <LinearGradient
