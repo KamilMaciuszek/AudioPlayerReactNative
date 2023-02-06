@@ -14,14 +14,25 @@ import Colors from "../constants/Colors";
 import { useState, useRef } from "react";
 import { Pressable, Animated } from "react-native";
 
-function PlayerScreen() {
+function PlayerScreen({route}) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [isPaused, setIsPaused] = useState(false);
-  const togglePause = () => setIsPaused((previousState) => !previousState);
+  const togglePause = () => {
+    setIsPaused((previousState) => !previousState);
+    isPaused ? pauseSong() : playSong();
+  };
   let spinValue = useRef(new Animated.Value(0)).current;
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
   const AnimatedImage = Animated.createAnimatedComponent(Image);
+  console.log(route.params.id);
+
+  function playSong() {
+    console.log("song is playing");
+  }
+  function pauseSong() {
+    console.log("pause")
+  }
 
   const spin = () => {
     Animated.timing(spinValue, {
