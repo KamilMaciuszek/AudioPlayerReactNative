@@ -5,7 +5,7 @@ import {
   Text,
   Pressable,
   ActivityIndicator,
-  Image
+  Image,
 } from "react-native";
 import Colors from "../constants/Colors";
 import getRecent from "../components/Recent";
@@ -29,7 +29,7 @@ function CategoryScreen() {
           const obj = {
             name: res.name,
             image: res.picture_big,
-            id: res.id
+            id: res.id,
           };
           listOfGenres.push(obj);
           setData(listOfGenres);
@@ -43,12 +43,13 @@ function CategoryScreen() {
   };
   useEffect(() => {
     getCategory();
-  }, []);
+  }, [navigation]);
 
   function renderCategoryItem(itemData) {
     function pressHandler() {
-      navigation.navigate("Player", {id: itemData.item.id});
+      navigation.navigate("Player", { id: itemData.item.id, name: itemData.item.name});
     }
+
     return (
       <Pressable
         android_ripple={{ color: Colors.primaryBlack }}
@@ -64,9 +65,10 @@ function CategoryScreen() {
         ]}
         onPress={pressHandler}
       >
-        <Image style = {styles.image} source={{uri: itemData.item.image}}>
-
-        </Image>
+        <Image
+          style={styles.image}
+          source={{ uri: itemData.item.image }}
+        ></Image>
         <Text
           style={[
             styles.textStyle,
@@ -85,15 +87,14 @@ function CategoryScreen() {
     <View style={styles.container}>
       {data ? (
         <FlatList
-        data={data}
-        keyExtractor={(data, index) => index.toString() }
-        renderItem={renderCategoryItem}
-        numColumns={1}
-        ListHeaderComponent={getRecent()}
-      ></FlatList>
+          data={data}
+          keyExtractor={(data, index) => index.toString()}
+          renderItem={renderCategoryItem}
+          numColumns={1}
+          ListHeaderComponent={getRecent()}
+        ></FlatList>
       ) : (
         <ActivityIndicator></ActivityIndicator>
-
       )}
     </View>
   );
@@ -107,7 +108,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   image: {
-    
     marginRight: 10,
     flex: 1,
   },
