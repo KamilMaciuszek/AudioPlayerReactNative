@@ -18,11 +18,6 @@ function CategoryScreen() {
   const [isLoading, setLoading] = useState(true);
   const [data, setData] = useState([]);
 
-  function getColor() {
-    const values = Object.values(Colors);
-    values.shift();
-    return values[Math.floor(Math.random() * values.length)];
-  }
 
   const getCategory = async () => {
     try {
@@ -34,6 +29,7 @@ function CategoryScreen() {
           const obj = {
             name: res.name,
             image: res.picture_big,
+            id: res.id
           };
           listOfGenres.push(obj);
           setData(listOfGenres);
@@ -51,7 +47,7 @@ function CategoryScreen() {
 
   function renderCategoryItem(itemData) {
     function pressHandler() {
-      navigation.navigate("Player", {id: itemData.index});
+      navigation.navigate("Player", {id: itemData.item.id});
     }
     return (
       <Pressable
@@ -90,10 +86,8 @@ function CategoryScreen() {
       {data ? (
         <FlatList
         data={data}
-        // extraData={this.state.first}
         keyExtractor={(data, index) => index.toString() }
         renderItem={renderCategoryItem}
-        initialNumToRender={3}
         numColumns={1}
         ListHeaderComponent={getRecent()}
       ></FlatList>
