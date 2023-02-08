@@ -8,6 +8,7 @@ import Colors from "../constants/Colors";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { Pressable, Animated } from "react-native";
 import { Audio } from "expo-av";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function PlayerScreen({ route }) {
   const [isEnabled, setIsEnabled] = useState(false);
@@ -44,16 +45,55 @@ function PlayerScreen({ route }) {
     });
   };
 
+  const saveRecent = async (value) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+      await AsyncStorage.setItem("recent", jsonValue);
+    } catch (e) {
+      console.log("error while storing data" + e);
+    }
+  };
+
+  const readRecent = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("recent");
+      if (jsonValue != null) {
+        const recentData = JSON.parse(jsonValue);
+        recentData.push({ name: route.params.name, id: route.params.id });
+        if (recentData.length > 5) {
+          recentData.shift();
+        }
+        saveRecent(recentData);
+      } else {
+        const recentData = [];
+        recentData.push({ name: route.params.name, id: route.params.id });      
+        saveRecent(recentData);
+      }
+    } catch (e) {
+      console.log("error while reading recent" + e);
+    }
+  };
+
+  useEffect(() => {
+    readRecent();
+  }, []);
+
   useEffect(() => {
     fetchSongs();
 
     const interval = setInterval(() => {
       sound.getStatusAsync().then((sound) => {
-        setPosition(Math.round(sound.positionMillis));
+        setPosition(sound.positionMillis);
       });
     }, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (Math.round(position / 100) >= 300) {
+      setCurrentSongIndex(currentSongIndex + 1);
+    }
+  }, [position]);
 
   async function playSong() {
     await sound.playAsync();
