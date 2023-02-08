@@ -1,23 +1,23 @@
-import {
-  Text,
-  StyleSheet,
-  Image,
-  View,
-  TouchableHighlight,
-} from "react-native";
+import { StyleSheet, Image, View } from "react-native";
 import Subtitle from "../components/Subtitle";
 import Title from "../components/Title";
 import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import ControlButton from "../components/ControlButton";
 import Colors from "../constants/Colors";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Pressable, Animated } from "react-native";
+import { Audio } from "expo-av";
 
-function PlayerScreen({route}) {
+function PlayerScreen({ route }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
+  const [position, setPosition] = useState(0);
+  const [songArray, setSongArray] = useState([]);
+  const [sound, setSound] = useState(new Audio.Sound());
   const [isPaused, setIsPaused] = useState(false);
+  const [currentSongIndex, setCurrentSongIndex] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
   const togglePause = () => {
     setIsPaused((previousState) => !previousState);
     isPaused ? pauseSong() : playSong();
@@ -25,22 +25,67 @@ function PlayerScreen({route}) {
   let spinValue = useRef(new Animated.Value(0)).current;
   const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
   const AnimatedImage = Animated.createAnimatedComponent(Image);
-  console.log(route.params.id);
 
-  function playSong() {
-    console.log("song is playing");
-  }
-  function pauseSong() {
-    console.log("pause")
+  const fetchSongs = async () => {
+    const url =
+      "https://api.deezer.com/chart/" + route.params.id + "/tracks&limit=50";
+    const response = await fetch(url);
+    await response.json().then((res) => {
+      const obj = res.data;
+      setSongArray(obj);
+      sound.getStatusAsync().then(function (result) {
+        if (result.isLoaded === false) {
+          sound.loadAsync({
+            uri: obj[currentSongIndex].preview,
+          });
+          setIsLoaded(true);
+        }
+      });
+    });
+  };
+
+  useEffect(() => {
+    fetchSongs();
+
+    const interval = setInterval(() => {
+      sound.getStatusAsync().then((sound) => {
+        setPosition(Math.round(sound.positionMillis));
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function playSong() {
+    await sound.playAsync();
   }
 
-  const spin = () => {
+  async function pauseSong() {
+    await sound.pauseAsync();
+  }
+
+  async function back() {
+    sound.getStatusAsync().then(function (result) {
+      sound.setPositionAsync(result.positionMillis - 5000);
+    });
+  }
+
+  async function forward() {
+    sound.getStatusAsync().then(function (result) {
+      sound.setPositionAsync(result.positionMillis + 5000);
+    });
+  }
+
+  async function setPositionAsync(value) {
+    await sound.setPositionAsync(Math.round(value));
+  }
+
+  const spin = useMemo(() => {
     Animated.timing(spinValue, {
       toValue: 1,
       duration: 3000,
       useNativeDriver: true,
     }).start(() => spinValue.setValue(0));
-  };
+  }, [isEnabled]);
 
   const interpolate = spinValue.interpolate({
     inputRange: [0, 1],
@@ -48,7 +93,7 @@ function PlayerScreen({route}) {
   });
 
   function showImage() {
-    spin();
+    spin;
     return isEnabled ? (
       <Animated.View
         style={[
@@ -63,7 +108,13 @@ function PlayerScreen({route}) {
           },
         ]}
       >
-        <Title>Hello</Title>
+        <Title>Next Song:</Title>
+        <Title>{songArray[currentSongIndex + 1]?.title}</Title>
+        <Subtitle>{songArray[currentSongIndex + 1]?.artist.name}</Subtitle>
+        <Image
+          source={{ uri: songArray[currentSongIndex + 1]?.album.cover_big }}
+          style={{ width: "50%", height: "30%", alignSelf: "center" }}
+        ></Image>
       </Animated.View>
     ) : (
       <AnimatedImage
@@ -79,7 +130,7 @@ function PlayerScreen({route}) {
           },
         ]}
         source={{
-          uri: "https://awildgeographer.files.wordpress.com/2015/02/john_muir_glacier.jpg",
+          uri: songArray[currentSongIndex]?.album.cover_big,
         }}
       />
     );
@@ -99,7 +150,40 @@ function PlayerScreen({route}) {
     );
   }
 
-  return (
+  const updateSong = async () => {
+    if (songArray !== []) {
+      await sound.unloadAsync();
+
+      if (isLoaded) {
+        await sound.loadAsync({
+          uri: songArray[currentSongIndex].preview,
+        });
+        await sound.playAsync();
+      }
+    }
+  };
+
+  useEffect(() => {
+    updateSong();
+  }, [currentSongIndex]);
+
+  async function PlayNextSong() {
+    if (currentSongIndex < songArray.length - 1) {
+      setCurrentSongIndex(currentSongIndex + 1);
+    } else if (currentSongIndex === songArray.length - 1) {
+      setCurrentSongIndex(0);
+    }
+  }
+
+  async function PlayPreviousSong() {
+    if (currentSongIndex > 0) {
+      setCurrentSongIndex(currentSongIndex - 1);
+    } else if (currentSongIndex === 0) {
+      setCurrentSongIndex(songArray.length - 1);
+    }
+  }
+
+  return songArray !== [] ? (
     <View style={styles.rootContainer}>
       <AnimatedPressable
         style={styles.container}
@@ -110,30 +194,54 @@ function PlayerScreen({route}) {
         {showImage}
       </AnimatedPressable>
 
-      <Title>Placeholder for the name of the song</Title>
-      <Subtitle>Placeholder for the artist name</Subtitle>
-      <Slider></Slider>
+      <Title>{songArray[currentSongIndex]?.title || ""}</Title>
+      <Subtitle>{songArray[currentSongIndex]?.artist.name || ""}</Subtitle>
+      <Slider
+        value={position ? position : 0}
+        maximumValue={30000}
+        onSlidingComplete={(value) => setPositionAsync(value)}
+      ></Slider>
       <View style={styles.timer}>
-        <Subtitle textStyle={styles.timerTextStyle}>03:05</Subtitle>
-        <Subtitle textStyle={styles.timerTextStyle}>04:15</Subtitle>
+        <Subtitle textStyle={styles.timerTextStyle}>
+          00:{Math.round(position / 1000)}
+        </Subtitle>
+        <Subtitle textStyle={styles.timerTextStyle}>00:30</Subtitle>
       </View>
       <View style={styles.row}>
-        <ControlButton onPress={() => {}}>
+        <ControlButton
+          onPress={() => {
+            PlayPreviousSong();
+          }}
+        >
           <Ionicons name="play-skip-back-outline" size={24} color={grey} />
         </ControlButton>
-        <ControlButton onPress={() => {}}>
+        <ControlButton
+          onPress={() => {
+            back();
+          }}
+        >
           <Ionicons name="play-back-outline" size={30} color={grey} />
         </ControlButton>
         <Pressable>{PlayButton}</Pressable>
 
-        <ControlButton onPress={() => {}}>
+        <ControlButton
+          onPress={() => {
+            forward();
+          }}
+        >
           <Ionicons name="play-forward-outline" size={30} color={grey} />
         </ControlButton>
-        <ControlButton onPress={() => {}}>
+        <ControlButton
+          onPress={() => {
+            PlayNextSong();
+          }}
+        >
           <Ionicons name="play-skip-forward-outline" size={24} color={grey} />
         </ControlButton>
       </View>
     </View>
+  ) : (
+    <View></View>
   );
 }
 
@@ -145,6 +253,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignSelf: "center",
     marginBottom: 20,
+    width: "90%",
   },
   image: {
     flex: 1,
