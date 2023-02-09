@@ -9,11 +9,13 @@ import {
   Image,
   Text,
   Pressable,
+  KeyboardAvoidingView,
 } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import Title from "../components/Title";
 import Colors from "../constants/Colors";
 import auth from "../firebaseConfig";
+import Toast from "react-native-simple-toast";
 
 function LoginScreen() {
   const [value, setValue] = useState({
@@ -28,7 +30,7 @@ function LoginScreen() {
   function onLoginPressHandler() {
     signInWithEmailAndPassword(auth, value.email, value.password).catch(
       (error) => {
-        console.log(error);
+        Toast.show(error.message, Toast.LONG);
       }
     );
   }
@@ -46,33 +48,36 @@ function LoginScreen() {
         ></Image>
 
         <Title textStyle={styles.titleStyle}>Sign In</Title>
+        <KeyboardAvoidingView
+          style={{ alignItems: "center" }}
+          behavior="position"
+        >
+          <Text style={styles.hint}>E-mail</Text>
+          <TextInput
+            style={styles.textField}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={value.email}
+            onChangeText={(text) => setValue({ ...value, email: text })}
+            placeholder="Enter your email"
+            placeholderTextColor={Colors.accentGrey}
+          ></TextInput>
 
-        <Text style={styles.hint}>E-mail</Text>
+          <Text style={styles.hint}>Password</Text>
 
-        <TextInput
-          style={styles.textField}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={value.email}
-          onChangeText={(text) => setValue({ ...value, email: text })}
-          placeholder="Enter your email"
-          placeholderTextColor={Colors.accentGrey}
-        ></TextInput>
-
-        <Text style={styles.hint}>Password</Text>
-
-        <TextInput
-          style={styles.textField}
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={value.password}
-          onChangeText={(text) => setValue({ ...value, password: text })}
-          placeholder="Enter your password"
-          placeholderTextColor={Colors.accentGrey}
-          secureTextEntry={true}
-          textContentType="password"
-        ></TextInput>
+          <TextInput
+            style={styles.textField}
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={value.password}
+            onChangeText={(text) => setValue({ ...value, password: text })}
+            placeholder="Enter your password"
+            placeholderTextColor={Colors.accentGrey}
+            secureTextEntry={true}
+            textContentType="password"
+          ></TextInput>
+        </KeyboardAvoidingView>
         <PrimaryButton onPress={onLoginPressHandler}>Login</PrimaryButton>
 
         <Text
@@ -109,7 +114,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   textField: {
-    width: "80%",
     borderBottomWidth: 2,
     borderBottomColor: Colors.accentGrey,
     marginBottom: 30,

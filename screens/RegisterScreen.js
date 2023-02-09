@@ -1,11 +1,19 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { View, StyleSheet, TextInput, Image, Text } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Image,
+  Text,
+  KeyboardAvoidingView,
+} from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import Title from "../components/Title";
 import Colors from "../constants/Colors";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { useState } from "react";
 import auth from "../firebaseConfig";
+import Toast from "react-native-simple-toast";
 
 function RegisterScreen() {
   const [value, setValue] = useState({
@@ -27,9 +35,8 @@ function RegisterScreen() {
         });
       })
       .catch((error) => {
-        const errorCode = error.code;
         const errorMessage = error.message;
-        console.log(error);
+        Toast.show(errorMessage, Toast.LONG);
       });
   }
   return (
@@ -43,47 +50,50 @@ function RegisterScreen() {
           source={require("../assets/icon.png")}
           style={styles.image}
         ></Image>
-
         <Title textStyle={styles.titleStyle}>Sign Up</Title>
+        <KeyboardAvoidingView
+          style={{ alignItems: "stretch" }}
+          behavior="position"
+        >
+          <Text style={styles.hint}>Name</Text>
 
-        <Text style={styles.hint}>Name</Text>
+          <TextInput
+            style={styles.textField}
+            autoCapitalize="Words"
+            autoCorrect={false}
+            placeholder="Enter your name"
+            placeholderTextColor={Colors.accentGrey}
+            value={value.name}
+            onChangeText={(text) => setValue({ ...value, name: text })}
+          ></TextInput>
 
-        <TextInput
-          style={styles.textField}
-          autoCapitalize="Words"
-          autoCorrect={false}
-          placeholder="Enter your name"
-          placeholderTextColor={Colors.accentGrey}
-          value={value.name}
-          onChangeText={(text) => setValue({ ...value, name: text })}
-        ></TextInput>
+          <Text style={styles.hint}>E-mail</Text>
 
-        <Text style={styles.hint}>E-mail</Text>
+          <TextInput
+            style={styles.textField}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={value.email}
+            onChangeText={(text) => setValue({ ...value, email: text })}
+            placeholder="Enter your email"
+            placeholderTextColor={Colors.accentGrey}
+          ></TextInput>
 
-        <TextInput
-          style={styles.textField}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={value.email}
-          onChangeText={(text) => setValue({ ...value, email: text })}
-          placeholder="Enter your email"
-          placeholderTextColor={Colors.accentGrey}
-        ></TextInput>
+          <Text style={styles.hint}>Password</Text>
+          <TextInput
+            style={styles.textField}
+            autoCapitalize="none"
+            autoCorrect={false}
+            value={value.password}
+            onChangeText={(text) => setValue({ ...value, password: text })}
+            placeholder="Enter your password"
+            placeholderTextColor={Colors.accentGrey}
+            secureTextEntry={true}
+            textContentType="password"
+          ></TextInput>
+        </KeyboardAvoidingView>
 
-        <Text style={styles.hint}>Password</Text>
-
-        <TextInput
-          style={styles.textField}
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={value.password}
-          onChangeText={(text) => setValue({ ...value, password: text })}
-          placeholder="Enter your password"
-          placeholderTextColor={Colors.accentGrey}
-          secureTextEntry={true}
-          textContentType="password"
-        ></TextInput>
         <PrimaryButton onPress={onRegisterPressHandler}>Sign Up</PrimaryButton>
       </LinearGradient>
     </View>
@@ -102,7 +112,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   textField: {
-    width: "80%",
     borderBottomWidth: 2,
     borderBottomColor: Colors.accentGrey,
     marginBottom: 30,
