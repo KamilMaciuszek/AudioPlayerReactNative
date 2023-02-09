@@ -5,7 +5,6 @@ import Colors from "../constants/Colors";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Subtitle from "./Subtitle";
 
 function getRecent() {
   const navigation = useNavigation();

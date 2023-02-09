@@ -29,10 +29,16 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#4b4e57"
-      }
+      },
+      "package": "com.kamilmaciuszek.AudioPlayer"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9f5e912c-6b19-4142-8a7a-2e994dc77d45"
+      }
     }
   }
 }

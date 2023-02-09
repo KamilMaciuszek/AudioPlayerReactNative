@@ -1,22 +1,37 @@
-import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  Image,
-  Text,
-} from "react-native";
+import { View, StyleSheet, TextInput, Image, Text } from "react-native";
 import PrimaryButton from "../components/PrimaryButton";
 import Title from "../components/Title";
 import Colors from "../constants/Colors";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { useState } from "react";
+import auth from "../firebaseConfig";
 
 function RegisterScreen() {
-    const navigation = useNavigation();
+  const [value, setValue] = useState({
+    email: "",
+    password: "",
+    name: "",
+  });
 
-    function onRegisterPressHandler() {
-        navigation.navigate("Category");
-      }
+  function onRegisterPressHandler() {
+    if (value.email === "" || value.password === "" || value.name === "") {
+      console.log("empty values");
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, value.email, value.password)
+      .then(() => {
+        updateProfile(auth.currentUser, {
+          displayName: value.name,
+        });
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.log(error);
+      });
+  }
   return (
     <View style={styles.root}>
       <LinearGradient
@@ -30,7 +45,7 @@ function RegisterScreen() {
         ></Image>
 
         <Title textStyle={styles.titleStyle}>Sign Up</Title>
-        
+
         <Text style={styles.hint}>Name</Text>
 
         <TextInput
@@ -39,6 +54,8 @@ function RegisterScreen() {
           autoCorrect={false}
           placeholder="Enter your name"
           placeholderTextColor={Colors.accentGrey}
+          value={value.name}
+          onChangeText={(text) => setValue({ ...value, name: text })}
         ></TextInput>
 
         <Text style={styles.hint}>E-mail</Text>
@@ -48,6 +65,8 @@ function RegisterScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          value={value.email}
+          onChangeText={(text) => setValue({ ...value, email: text })}
           placeholder="Enter your email"
           placeholderTextColor={Colors.accentGrey}
         ></TextInput>
@@ -58,14 +77,14 @@ function RegisterScreen() {
           style={styles.textField}
           autoCapitalize="none"
           autoCorrect={false}
+          value={value.password}
+          onChangeText={(text) => setValue({ ...value, password: text })}
           placeholder="Enter your password"
           placeholderTextColor={Colors.accentGrey}
           secureTextEntry={true}
           textContentType="password"
         ></TextInput>
-        <PrimaryButton onPress={onRegisterPressHandler}>
-            Sign Up
-        </PrimaryButton>
+        <PrimaryButton onPress={onRegisterPressHandler}>Sign Up</PrimaryButton>
       </LinearGradient>
     </View>
   );
@@ -105,6 +124,6 @@ const styles = StyleSheet.create({
     paddingLeft: "12%",
     alignSelf: "flex-start",
     fontSize: 16,
-    color: Colors.accentGrey
+    color: Colors.accentGrey,
   },
 });

@@ -1,53 +1,14 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Colors from "./constants/Colors";
-import LoginScreen from "./screens/LoginScreen";
-import PlayerScreen from "./screens/PlayerScreen";
-import CategoryScreen from "./screens/CategoryScreen";
-import RegisterScreen from "./screens/RegisterScreen";
+import RootNavigation from "./navigation/RootNavigation";
 
 const Stack = createNativeStackNavigator();
-
 
 export default function App() {
   return (
     <>
       <StatusBar style="light" />
-
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{
-          headerStyle: {backgroundColor: Colors.primaryBlack},
-          headerTintColor: "white",
-          contentStyle: {
-            backgroundColor: Colors.primaryBlack
-          }
-        }}>
-          <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{headerShown: false}}
-          />
-          <Stack.Screen
-          name = "Category"
-          component={CategoryScreen}
-          options={{title: "Hello, user"}}
-          />
-          
-          <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{ headerTitle: "", headerTransparent: true, headerStyle: {backgroundColor: "transparent"}}}
-          />
-          <Stack.Screen
-          name =  "Player"
-          component={PlayerScreen}
-          options={{title: "Player"}}
-          //title: Category Name
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <RootNavigation></RootNavigation>
     </>
   );
 }

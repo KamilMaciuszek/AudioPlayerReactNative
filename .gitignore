@@ -13,3 +13,4 @@ web-build/
 # macOS
 .DS_Store
 constants/ApiKey.js
+constants/api_key.js

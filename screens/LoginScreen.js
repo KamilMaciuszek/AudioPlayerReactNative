@@ -1,5 +1,7 @@
+import { getAuth, signInWithEmailAndPassword } from "@firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -11,21 +13,25 @@ import {
 import PrimaryButton from "../components/PrimaryButton";
 import Title from "../components/Title";
 import Colors from "../constants/Colors";
+import auth from "../firebaseConfig";
 
 function LoginScreen() {
+  const [value, setValue] = useState({
+    email: "",
+    password: "",
+  });
   const navigation = useNavigation();
   function pressHandler() {
     navigation.navigate("Register");
   }
 
   function onLoginPressHandler() {
-    navigation.navigate("Category");
+    signInWithEmailAndPassword(auth, value.email, value.password).catch(
+      (error) => {
+        console.log(error);
+      }
+    );
   }
-
-//   const [data, setData] = useState("");
-
-  
-
 
   return (
     <View style={styles.root}>
@@ -48,6 +54,8 @@ function LoginScreen() {
           keyboardType="email-address"
           autoCapitalize="none"
           autoCorrect={false}
+          value={value.email}
+          onChangeText={(text) => setValue({ ...value, email: text })}
           placeholder="Enter your email"
           placeholderTextColor={Colors.accentGrey}
         ></TextInput>
@@ -58,6 +66,8 @@ function LoginScreen() {
           style={styles.textField}
           autoCapitalize="none"
           autoCorrect={false}
+          value={value.password}
+          onChangeText={(text) => setValue({ ...value, password: text })}
           placeholder="Enter your password"
           placeholderTextColor={Colors.accentGrey}
           secureTextEntry={true}
