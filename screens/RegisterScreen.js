@@ -46,15 +46,17 @@ function RegisterScreen() {
         colors={[Colors.primaryGrey, Colors.primaryRed]}
         style={styles.gradient}
       >
-        <Image
-          source={require("../assets/icon.png")}
-          style={styles.image}
-        ></Image>
-        <Title textStyle={styles.titleStyle}>Sign Up</Title>
         <KeyboardAvoidingView
           style={{ alignItems: "stretch" }}
           behavior="position"
         >
+        <Image
+          source={require("../assets/icon.png")}
+          style={styles.image}
+        ></Image>
+        
+        <Title textStyle={styles.titleStyle}>Sign Up</Title>
+        
           <Text style={styles.hint}>Name</Text>
 
           <TextInput
@@ -124,6 +126,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     marginBottom: "10%",
+    alignSelf: "center"
   },
   titleStyle: {
     marginBottom: "20%",
