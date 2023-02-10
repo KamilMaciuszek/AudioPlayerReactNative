@@ -5,12 +5,13 @@ import Slider from "@react-native-community/slider";
 import { Ionicons } from "@expo/vector-icons";
 import ControlButton from "../components/ControlButton";
 import Colors from "../constants/Colors";
+import { HeaderBackButton } from '@react-navigation/elements';
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Pressable, Animated } from "react-native";
+import { Pressable, Animated, BackHandler } from "react-native";
 import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-function PlayerScreen({ route }) {
+function PlayerScreen({ route, navigation }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   const [position, setPosition] = useState(0);
@@ -34,6 +35,7 @@ function PlayerScreen({ route }) {
     await response.json().then((res) => {
       const obj = res.data;
       setSongArray(obj);
+
       sound.getStatusAsync().then(function (result) {
         if (result.isLoaded === false) {
           sound.loadAsync({
@@ -66,13 +68,40 @@ function PlayerScreen({ route }) {
         saveRecent(recentData);
       } else {
         const recentData = [];
-        recentData.push({ name: route.params.name, id: route.params.id });      
+        recentData.push({ name: route.params.name, id: route.params.id });
         saveRecent(recentData);
       }
     } catch (e) {
       console.log("error while reading recent" + e);
     }
   };
+
+
+  useEffect(()=> {
+    navigation.setOptions({
+      headerShown: true,
+      headerLeft: (props) => (
+        <HeaderBackButton {...props}
+        onPress={()=> {
+          sound.unloadAsync();
+          navigation.goBack();
+        }}
+        />
+      )
+    })
+  }, [])
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        sound.unloadAsync();
+        navigation.goBack();
+        return true;
+      }
+    )
+    return () => backHandler.remove();
+  }, [])
 
   useEffect(() => {
     readRecent();
