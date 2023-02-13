@@ -24,7 +24,7 @@ There are 4 screens: Login, Register if user is not logged in and Category, Play
 <br/>
 <br/>
 
-Every Category that was used recently is saved in the local data (up to 5 categories)
+Each Category that was used recently is saved in the local data (up to 5 categories)
 At most last 5 opened categories are shown in the "recent" section:
 
 <br/>
@@ -42,8 +42,8 @@ At most last 5 opened categories are shown in the "recent" section:
 <br/>
 
 Categories are taken from the Deezer Api.
-Every Category has 50 song previews which can be paused, rewound for 5 second or skipped/played previous song.
-Every song has the Slider with the timer that allows to rewound the song by any amount of time.
+Each Category has 50 song previews which can be paused, rewound for 5 second or skipped/played previous song.
+Eeach song has the Slider with the timer that allows to rewound the song by any amount of time.
 
 
 <br/>
